@@ -10,6 +10,7 @@
             @size-change="sizeChange"
             @sort-change="sortChange"
             @current-change="currentChange"
+            @row-click="getSelectItemInfo"
         >
             <template slot-scope="scope" slot="menuLeft">
                 <cj-main-top-button
@@ -27,6 +28,49 @@
                 ></cj-main-top-button>
             </template>
         </avue-crud>
+
+        <avue-crud
+            :data="itemData"
+            :option="itemOption"
+        >
+            <template slot-scope="scope" slot="menuLeft">
+                <el-button 
+                    icon="el-icon-plus" 
+                    type="success" 
+                    size="small"
+                    @click="addSectionInfo"
+                >
+                    添加作业区段
+                </el-button>
+            </template>
+
+            <template slot-scope="scope" slot="menu">
+                <el-button
+                    icon="el-icon-delete"
+                    size="small"
+                    type="danger"
+                    @click="delItemArea(scope.row)"
+                >
+                    删除
+                </el-button>
+            </template>
+        </avue-crud>
+
+        <el-dialog :title="'给'+selectItem.car_no+'添加作业区段'" :visible.sync="addSectionWindow">
+            <el-select @change="handleSelectArea" v-model="selectAreaValue" placeholder="请选择">
+                <el-option
+                    v-for="(item, index) in selectAreaInfo"
+                    :key="index"
+                    :label="item.name"
+                    :value="item.id">
+                </el-option>
+            </el-select>
+
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="addSectionWindow = false">取消</el-button>
+                <el-button type="primary" @click="submitSelectArea">确定</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -38,14 +82,41 @@ export default {
     data() {
         return {
             loading: true,
+            setModifyWorkArea: false,
             data: [],
+            itemData: [],
+            itemOption: {
+                align:'center',
+                menuAlign:'center',
+                addBtn: false,
+                refreshBtn: false,
+                columnBtn: false,
+                page: false,
+                editBtn: false,
+                delBtn: false,
+                column: [
+                    {label: '区段名称', prop: 'segment_name'},
+                    {label: '区段编码', prop: 'segment_code'}
+                ]
+            },
+            selectInfo: [
+                {label: '区段名称', prop: 'segment_name', value: ''}
+            ],
+            selectAreaInfo: [/* 获取下拉区域选择 */],
+            selectItem: {}, // 区段选择行操作赋值
+            selectAreaValue: '',
+            addSectionWindow: false,
             option: {
+                highlightCurrentRow:true,
                 page: true,
                 align:'center',
                 menuAlign:'center',
-                menu: false,
+                delBtn: false,
+                editBtn: false,
                 addBtn: false,
+                menu: false,
                 selection: true,
+                menuWidth: 150,
                 column:[
                     {label: '车牌号',prop: 'car_no', sortable:true},
                     {label: '车载设备ID',prop: 'mobile_unit_id', sortable:true},
@@ -181,6 +252,19 @@ export default {
                 ]
             )
         },
+        getSelectAreaInfo() {
+            // 获取区段信息
+            request.requestParams(
+                [
+                    '/common/getAssignments',
+                    'post',
+                    {},
+                    (res) => {
+                        this.selectAreaInfo = res.data
+                    }
+                ]
+            )
+        },
         check(item) {
             // 检测重复
             config.setPrompt(this.userInfo.forms) // 检测前先设置为空
@@ -240,7 +324,6 @@ export default {
             }
             params.area_id = area.id
             params.car_type_id = typeId
-            console.log("params:", params)
             request.requestParams(
                 [
                     '/carinfo/addInfo',
@@ -374,16 +457,96 @@ export default {
             )
         },
         downloadModelFile() {
-            window.open('http://192.168.64.2/cj_project_file/carInfoModelFile.xls')
+            // 下载
+            window.open('http://192.168.64.2/cj_project_file/车辆信息模版.xls')
+        },
+        getSelectItemInfo(item) {
+            // 获取区段信息
+            if(item) {
+                this.selectItem = item
+            }
+            request.requestParams(
+                [
+                    '/carassignmentsrelation/getVCarAssignments',
+                    'post',
+                    {
+                        carInfoId: this.selectItem.id
+                    },
+                    (res) => {
+                        res.data.code == 11 ?
+                            this.$message({message: '共有'+res.data.data.length+'条数据', type: 'success'}) :
+                            this.$message({message: res.data.msg})
+                        this.itemData = res.data.data
+                    },
+                    false
+                ]
+            )
+        },
+        addSectionInfo() {
+            // 添加区段信息
+            if(this.selectItem.id) {
+                this.addSectionWindow = true
+            }
+        },
+        handleSelectArea(value) {
+            // 区段下拉选择
+            this.selectAreaValue = value
+        },
+        submitSelectArea() {
+            // 提交区域选择
+            let params = {assignments_id: this.selectAreaValue, car_info_id: this.selectItem.id}
+            request.requestParams(
+                [
+                    '/carassignmentsrelation/addInfo',
+                    'post',
+                    params,
+                    (res) => {
+                        res.data.code == 11 ?
+                            this.$message({message: res.data.msg, type: 'success'}) :
+                            this.$message({message: res.data.msg})
+                        this.getSelectItemInfo()
+                        this.addSectionWindow = false
+                    },
+                    false
+                ]
+            )
+        },
+        delItemArea(value) {
+            this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                request.requestParams(
+                    [
+                        '/carassignmentsrelation/del/' + value.id,
+                        'delete',
+                        {},
+                        (res) => {
+                            res.data.code == 11 ?
+                                this.$message({message: res.data.msg, type: 'success'}) :
+                                this.$message({message: res.data.msg})
+                            this.getSelectItemInfo()
+                        },
+                        false
+                    ]
+                )
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消删除'
+                });          
+            });
         }
     },
     created() {
         this.getInfo()
         this.getAreaCommon()
         this.getCarTypeCommon()
+        this.getSelectAreaInfo()
     },
     components: {
-        cjMainTopButton
+        cjMainTopButton,
     }
 }
 </script>

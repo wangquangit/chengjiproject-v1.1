@@ -16,10 +16,8 @@
                                     @editSubmit="editSubmit"
                                     @deleteForm="deleteForm"
                                     @showInfo="showInfo"
-                                    @submitImportFile="submitImportFile"
                                     @submitSearch="submitSearch"
-                                    @export="exports"
-                                    @downloadModelFile="downloadModelFile"></cj-main-top-button>
+                                    @export="exports"></cj-main-top-button>
             </template>
         </avue-crud>
     </div>
@@ -42,16 +40,13 @@
                     selection: true,
                     column: [
                         { label: '车牌号', prop: 'car_no',sortable: true}, 
-                        { label: '年检日期', prop: 'annual_date',sortable: true}, 
-                        { label: '车管所名称', prop: 'DMV_name',sortable: true}, 
-                        // { label: '检查单位', prop: 'check_the_unit',sortable: true}, 
-                        // { label: '检查内容', prop: 'check_centext',sortable: true}, 
-                        // { label: '检测价格', prop: 'check_fee',sortable: true}, 
-                        // { label: '车船税', prop: 'vehicle_and_vessel',sortable: true}, 
-                        { label: '其他费用', prop: 'other_fee',sortable: true}, 
-                        { label: '年检起始日期', prop: 'annual_start_date',sortable: true}, 
-                        { label: '年检结束日期', prop: 'annual_end_date',sortable: true}, 
-                        { label: '经办人', prop: 'agent',sortable: true}, 
+                        { label: '车型', prop: 'car_type_name',sortable: true}, 
+                        { label: '司机', prop: 'driver',sortable: true}, 
+                        { label: '手机', prop: 'phone',sortable: true}, 
+                        { label: '实际车速', prop: 'speed',sortable: true}, 
+                        { label: '限定车速', prop: 'speed_limit',sortable: true}, 
+                        { label: '异常类型', prop: 'error_type',sortable: true}, 
+                        { label: '发生时间', prop: 'occurrence_time',sortable: true}, 
                         { label: '修改时间', prop: 'updated_time',sortable: true}, 
                     ]
                 },
@@ -72,16 +67,12 @@
                 userInfo: {
                     forms: [
                         { label: '车牌号', prop: 'car_no', value: '', selectCarNo: true, selectArr: []}, 
-                        { label: '年检日期', prop: 'annual_date', value: '', selectDate: true}, 
-                        { label: '车管所名称', prop: 'DMV_name', value: ''}, 
-                        { label: '检查单位', prop: 'check_the_unit', value: ''}, 
-                        { label: '检查内容', prop: 'check_centext', value: ''}, 
-                        { label: '检测价格', prop: 'check_fee', value: ''}, 
-                        { label: '车船税', prop: 'vehicle_and_vessel', value: ''}, 
-                        { label: '其他费用', prop: 'other_fee', value: ''}, 
-                        { label: '年检起始日期', prop: 'annual_start_date', value: '', selectDate: true}, 
-                        { label: '年检结束日期', prop: 'annual_end_date', value: '', selectDate: true}, 
-                        { label: '经办人', prop: 'agent', value: ''}, 
+                        { label: '发生时间', prop: 'occurrence_time', value: '',  selectDate: true}, 
+                        { label: '司机', prop: 'driver', value: ''}, 
+                        { label: '手机', prop: 'phone', value: ''}, 
+                        { label: '实际车速', prop: 'speed', value: ''}, 
+                        { label: '限定车速', prop: 'speed_limit', value: ''}, 
+                        { label: '异常类型', prop: 'error_type', value: ''}, 
                     ],
                     searchWindowForm: [
                         { label: '车牌号', prop: 'car_no', value: '' },
@@ -105,7 +96,7 @@
                     let params = config.setParams(this.params, this.page)
                     request.requestParams(
                         [
-                            '/carannual/search',
+                            '/carworkingerror/search',
                             'post',
                             params,
                             (res) => {
@@ -152,7 +143,7 @@
             },
             getButton() {
                 // 获取按钮
-                this.buttonList = this.$store.state.mainButtonInfo['carannual']
+                this.buttonList = this.$store.state.mainButtonInfo['carworkingerror']
             },
             sortChange(value) {
                 // 排序
@@ -173,21 +164,24 @@
             },
             addSubmit(forms, area, typeId) {
                 let params = config.formJson(forms)
-                let p = this.userInfo.forms
+                if(!typeId) {
+                    this.$message({message: '请选择车牌号'})
+                    return
+                }
+                params.car_no = typeId
                 for (var i in forms) {
                     if (forms[i].selectDate) {
-                        if (forms[i].value == '') {
-                            params[forms[i].prop] = null
-                        } else {
+                        if (typeof forms[i].value == 'object') {
                             params[forms[i].prop] = config.setDate(forms[i].value)
+                        } else {
+                            params[forms[i].prop] = null
                         }
                     }
                 }
-                params.car_no = typeId
                 console.log("params:", params)
                 request.requestParams(
                     [
-                        '/carannual/addInfo',
+                        '/carworkingerror/addInfo',
                         'post',
                         params,
                         (res) => {
@@ -207,6 +201,11 @@
                 // 修改
                 var params = config.formJson(forms)
                 params.id = this.userInfo.selectionArr[0].id
+                if (carType) {
+                    params.car_no = carType
+                } else {
+                    params.car_no = this.userInfo.selectionArr[0].car_no
+                }
                 for(var i in forms) {
                     if(forms[i].selectDate) {
                         if(typeof forms[i].value == 'object') {
@@ -214,15 +213,9 @@
                         }
                     }
                 }
-                if(carType) {
-                    params.car_no = carType
-                } else {
-                    params.car_no = this.userInfo.selectionArr[0].car_no
-                }
-                console.log("params:", params)
                 request.requestParams(
                     [
-                        '/carannual/editInfo',
+                        '/carworkingerror/editInfo',
                         'put',
                         params,
                         (res) => {
@@ -239,7 +232,7 @@
                 // 删除
                 request.requestParams(
                     [
-                        '/carannual/del/' + value,
+                        '/carworkingerror/del/' + value,
                         'delete',
                         {},
                         (res) => {
@@ -262,22 +255,6 @@
                     this.$message({ message: '请选择一个' })
                 }
             },
-            submitImportFile(files) {
-                request.requestParams(
-                    [
-                        '/carannual/import',
-                        'post',
-                        files,
-                        (res) => {
-                            res.data.code == 11 ?
-                                this.$message({ message: res.data.msg, type: 'success' }) :
-                                this.$message({ message: res.data.msg })
-                            this.getInfo()
-                        },
-                        true
-                    ]
-                )
-            },
             submitSearch(forms) {
                 this.params.where = [
                     {
@@ -285,11 +262,6 @@
                         op: 'like',
                         value: config.handleSearch(forms, 'car_no')
                     },
-                    {
-                        name: 'mobile_unit_id',
-                        op: 'eq',
-                        value: config.handleSearch(forms, 'mobile_unit_id')
-                    }
                 ]
                 this.getInfo()
             },
@@ -297,7 +269,7 @@
                 let params = config.setParams(this.params, this.page)
                 request.requestParams(
                     [
-                        '/carannual/export',
+                        '/carworkingerror/export',
                         'post',
                         params,
                         (res) => {
@@ -305,7 +277,7 @@
                             let link = document.createElement('a')
                             link.style.display = 'none'
                             link.href = url
-                            link.setAttribute('download', 'carannualExcel.xls')
+                            link.setAttribute('download', '车辆作业异常表.xls')
                             document.body.appendChild(link)
                             link.click()
                         },
@@ -314,9 +286,6 @@
                     ]
                 )
             },
-            downloadModelFile() {
-                window.open('http://192.168.64.2/cj_project_file/车俩年检记录模板.xls')
-            }
         },
         created() {
             this.getInfo()

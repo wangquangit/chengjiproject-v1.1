@@ -25,14 +25,14 @@
                         <span>{{menu.name}}</span>
                     </template>
                     <el-menu-item-group>
-                        <el-menu-item
-                            v-for="(item, itemindex) in menu.children"
-                            :key="itemindex"
-                            :index="String(menuindex+'-'+itemindex)"
-                            @click="gotourl(item.listButton,item.url)"
-                        >
-                            {{item.name}}
-                        </el-menu-item>
+                            <el-menu-item
+                                v-for="(item, itemindex) in menu.children"
+                                :key="itemindex"
+                                :index="String(menuindex+'-'+itemindex)"
+                                @click="gotourl(item.listButton,item.url)"
+                            >
+                                {{item.name}}
+                            </el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
             </el-menu>
@@ -69,11 +69,11 @@
 
             <el-scrollbar style="height:100%">
             <!-- <el-main class="main"> -->
-                <div class="main">
-                    <keep-alive>
-                        <router-view></router-view>
-                    </keep-alive>
-                </div>
+                    <div class="main">
+                        <keep-alive>
+                            <router-view></router-view>
+                        </keep-alive>
+                    </div>
             </el-scrollbar>
             <!-- </el-main> -->
 

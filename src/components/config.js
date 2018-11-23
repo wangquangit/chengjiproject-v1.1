@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+
 export default{
     // serverurl: 'http://192.168.0.154:8888', 
     serverurl: 'http://192.168.0.198:8888', 
@@ -67,5 +68,5 @@ export default{
                 i.prompt = ''
             }
         }
-    }
+    },
 }

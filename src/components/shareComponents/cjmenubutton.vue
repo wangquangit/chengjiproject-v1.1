@@ -23,7 +23,7 @@
                     >
 
                         <el-input 
-                            v-if="!item.select && !item.file && !item.selectDate && !item.date"
+                            v-if="!item.select && !item.file && !item.selectDate && !item.date && !item.selectCarNo"
                             @focus="focus(item)" 
                             @blur="blur(item)" 
                             v-model="item.value"
@@ -74,6 +74,21 @@
                             </el-option>
                         </el-select>
 
+                        <el-select 
+                            @change="handleSelectCarNo" 
+                            v-if="item.selectCarNo" 
+                            v-model="selectValue" 
+                            placeholder="请选择">
+                            <!--  下拉选择车牌号 -->
+                            <el-option 
+                                v-for="(item, index) of item.selectArr"
+                                :key="index"
+                                :label="item.name"
+                                :value="item.name"
+                            >
+                            </el-option>
+                        </el-select>
+
                     </el-form-item>
                 </el-form>
                 <div slot="footer" class="dialog-footer">
@@ -92,8 +107,11 @@
                         :label-width="formLabelWidth"
                         v-if="item.label != 'id'"
                     >
-                        <el-input v-if="!item.file && !item.select && !item.selectDate && !item.selectArea" @change="change(item)" 
-                        @focus="focus(item)" v-model="item.value"></el-input>
+                        <el-input 
+                            v-if="!item.file && !item.select && !item.selectDate && !item.selectArea && !item.selectCarNo" 
+                            @change="change(item)" 
+                            @focus="focus(item)" 
+                            v-model="item.value"></el-input>
 
                         <el-input
                             v-if="item.selectArea" 
@@ -134,6 +152,21 @@
                                 :key="index"
                                 :label="item.name"
                                 :value="item.id"
+                            >
+                            </el-option>
+                        </el-select>
+
+                        <el-select 
+                            @change="handleSelectCarNo" 
+                            v-if="item.selectCarNo" 
+                            v-model="carTypeSelect" 
+                            :placeholder="getCarName(item)">
+                            <!--  下拉选择车牌号 -->
+                            <el-option 
+                                v-for="(item, index) of item.selectArr"
+                                :key="index"
+                                :label="item.name"
+                                :value="item.name"
                             >
                             </el-option>
                         </el-select>
@@ -303,6 +336,7 @@ export default {
                     item.prompt = ''
                 }
                 item.value = ''
+                this.carTypeSelect = null
             }
             this.addTableVisible = true
         },
@@ -326,6 +360,10 @@ export default {
                     // 清空提示
                     item.prompt = ''
                 }
+                if(item.selectCarNo) {
+                    item.value = null
+                }
+                this.carTypeSelect = null
             }
             this.$emit('closePermit') // 关闭提示
             if(this.data.selectionArr.length > 0){
@@ -398,6 +436,10 @@ export default {
         },
         handleSelect(value) {
             // 选择下拉列表后赋值
+            this.carTypeSelect = value
+        },
+        handleSelectCarNo(value) {
+            console.log(value)
             this.carTypeSelect = value
         },
         export() {
@@ -585,6 +627,9 @@ export default {
             if(item.placeholder) {
                 return item.placeholder
             }
+        },
+        getCarName(item) {
+            return item.value
         }
     },
 }

@@ -13,16 +13,13 @@
                 <cj-main-top-button :buttonList="buttonList"
                                     :data="userInfo"
                                     @addSubmit="addSubmit"
-                                    @check="check"
                                     @editSubmit="editSubmit"
-                                    @checkItem="check"
                                     @deleteForm="deleteForm"
                                     @showInfo="showInfo"
                                     @submitImportFile="submitImportFile"
                                     @submitSearch="submitSearch"
                                     @export="exports"
-                                    @downloadModelFile="downloadModelFile"
-                ></cj-main-top-button>
+                                    @downloadModelFile="downloadModelFile"></cj-main-top-button>
             </template>
         </avue-crud>
     </div>
@@ -44,22 +41,16 @@
                     addBtn: false,
                     selection: true,
                     column: [
-                        // { label: 'id', prop: 'id',sortable: true}, 
-                        { label: '区段名称', prop: 'segment_name',sortable: true}, 
-                        { label: '区段编码', prop: 'segment_code',sortable: true}, 
-                        { label: '区域', prop: 'area_name_text',sortable: true, width: 200}, 
-                        // { label: '要求作业速度', prop: 'working_speed',sortable: true}, 
-                        // { label: '允许车速偏差', prop: 'speed_offset',sortable: true}, 
-                        // { label: '要求作业油耗', prop: 'working_oil_wear',sortable: true}, 
-                        // { label: '允许油耗偏差', prop: 'oil_wear_offset',sortable: true}, 
-                        // { label: '要求作业时长', prop: 'working_time',sortable: true}, 
-                        // { label: '允许时长偏差', prop: 'working_time_offset',sortable: true}, 
-                        { label: '要求作业开始时间', prop: 'working_start_time',sortable: true, width: 200}, 
-                        { label: '允许时间偏差', prop: 'start_time_offset',sortable: true, width: 180}, 
-                        // { label: '创建人', prop: 'created_by',sortable: true}, 
-                        // { label: '创建时间', prop: 'created_time',sortable: true}, 
-                        { label: '修改人', prop: 'updated_by',sortable: true}, 
-                        { label: '修改时间', prop: 'updated_time',sortable: true, width: 200}, 
+                        { label: '违章日期', prop: 'violation_date',sortable: true}, 
+                        { label: '车牌号', prop: 'car_no',sortable: true}, 
+                        { label: '车型', prop: 'car_type_id',sortable: true}, 
+                        { label: '违章地点', prop: 'violation_area',sortable: true}, 
+                        { label: '违章内容', prop: 'violation_centext',sortable: true}, 
+                        { label: '违章处理单位', prop: 'violation_processing',sortable: true}, 
+                        { label: '违章司机', prop: 'violation_driver',sortable: true}, 
+                        { label: '违章扣分', prop: 'violation_points',sortable: true}, 
+                        { label: '违章费用', prop: 'violation_fee',sortable: true}, 
+                        { label: '经办人', prop: 'agent',sortable: true}, 
                     ]
                 },
                 buttonList: null,
@@ -78,28 +69,25 @@
                 },
                 userInfo: {
                     forms: [
-                        { label: '区域', prop: 'area_id',value: '', selectArea: true, props: 'area_name_text'}, 
-                        { label: '区段编码', prop: 'segment_code',value: ''}, 
-                        { label: '区段名称', prop: 'segment_name',value: '', censor: true, prompt: '', placeholder: '此项为必填项'}, 
-                        { label: '允许油耗偏差', prop: 'oil_wear_offset',value: ''}, 
-                        { label: '允许车速偏差', prop: 'speed_offset',value: ''}, 
-                        { label: '允许时间偏差', prop: 'start_time_offset',value: ''},  
-                        { label: '允许时长偏差', prop: 'working_time_offset',value: ''}, 
-                        { label: '要求作业油耗', prop: 'working_oil_wear',value: ''}, 
-                        { label: '要求作业速度', prop: 'working_speed',value: ''}, 
-                        { label: '要求作业时长', prop: 'working_time',value: ''}, 
-                        { label: '要求作业开始时间', prop: 'working_start_time', value: '', selectDate: true},
+                        { label: '违章日期', prop: 'violation_date', value: '', selectDate: true}, 
+                        { label: '车牌号', prop: 'car_no', value: '', selectCarNo: true, selectArr: []}, 
+                        { label: '违章地点', prop: 'violation_area', value: ''}, 
+                        { label: '违章内容', prop: 'violation_centext', value: ''}, 
+                        { label: '违章处理单位', prop: 'violation_processing', value: ''}, 
+                        { label: '违章司机', prop: 'violation_driver', value: ''}, 
+                        { label: '违章扣分', prop: 'violation_points', value: ''}, 
+                        { label: '违章费用', prop: 'violation_fee', value: ''}, 
+                        { label: '经办人', prop: 'agent', value: ''}, 
                     ],
                     searchWindowForm: [
-                        { label: '区段编码', prop: 'segment_code',value: ''}, 
-                        { label: '区段名称', prop: 'segment_name',value: ''}, 
+                        { label: '车牌号', prop: 'car_no', value: '' },
                     ],
                     selectionArr: [],
                     formTitle: {
                         idFiled: 'id',
-                        titleFiled: 'segment_name' // title
+                        titleFiled: 'car_no'
                     },
-                    addPermitSubmit: false, // 添加时允许直接提交
+                    addPermitSubmit: true, // 添加时允许直接提交
                     editPermitSubmit: true, // 修改时允许直接提交
                     getAreaCommon: [], // 区域选择
                 },
@@ -113,7 +101,7 @@
                     let params = config.setParams(this.params, this.page)
                     request.requestParams(
                         [
-                            '/carassignmentssection/search',
+                            '/carvehicleviolation/search',
                             'post',
                             params,
                             (res) => {
@@ -140,22 +128,27 @@
                     }, 2000)
                 }
             },
-            getAreaCommon() {
-                // 请求区域接口
+            getCarInfo() {
+                // 获取下拉车型
                 request.requestParams(
                     [
-                        '/common/getAreaCommon',
+                        '/common/getCarInfoCommon',
                         'post',
                         {},
                         (res) => {
-                            this.userInfo.getAreaCommon = res.data
-                        }
+                            for(var i of this.userInfo.forms) {
+                                if(i.selectCarNo) {
+                                    i.selectArr = res.data
+                                }
+                            }
+                        },
+                        false
                     ]
                 )
             },
             getButton() {
                 // 获取按钮
-                this.buttonList = this.$store.state.mainButtonInfo['carassignmentssection']
+                this.buttonList = this.$store.state.mainButtonInfo['carvehicleviolation']
             },
             sortChange(value) {
                 // 排序
@@ -174,63 +167,22 @@
                 this.page.pageSize = value
                 this.getInfo()
             },
-            check(item) {
-                // 检测重复
-                config.setPrompt(this.userInfo.forms) // 检测前先设置为空
-                if (item.value != '') {
-                    let params = {segmentName: item.value}
-                    request.requestParams(
-                        [
-                            '/carassignmentssection/isExistence',
-                            'post',
-                            params,
-                            (res) => {
-                                if (res.data.code == -11) {
-                                    for (var i of this.userInfo.forms) {
-                                        if (i.prop == item.prop) {
-                                            i.prompt = i.label + '存在重复'
-                                        }
-                                    }
-                                } else {
-                                    for (var i of this.userInfo.forms) {
-                                        if(i.prop == item.prop) {
-                                            i.prompt = ''
-                                        }
-                                    }
-                                }
-                                this.userInfo.addPermitSubmit = config.setButton(this.userInfo.forms) // 设置按钮状态
-                                this.userInfo.editPermitSubmit = config.setButton(this.userInfo.forms) // 设置按钮状态
-                            },
-                            false
-                        ]
-                    )
-                } else {
-                    for (var i of this.userInfo.forms) {
-                        if (i.prop == item.prop) {
-                            i.prompt = i.label + '不允许为空!!'
-                        }
-                    }
-                }
-                this.userInfo.addPermitSubmit = config.setButton(this.userInfo.forms) // 设置按钮状态
-                this.userInfo.editPermitSubmit = config.setButton(this.userInfo.forms)
-            },
             addSubmit(forms, area, typeId) {
-                // 添加
                 let params = config.formJson(forms)
-                let p = this.userInfo.forms
-                for (var i of forms) {
-                    if (i.selectDate) {
-                        if (i.value == '') {
-                            params.working_start_time = null
+                for (var i in forms) {
+                    if (forms[i].selectDate) {
+                        if (forms[i].value == '') {
+                            params[forms[i].prop] = null
                         } else {
-                            params.working_start_time = config.setDate(i.value)
+                            params[forms[i].prop] = config.setDate(forms[i].value)
                         }
                     }
                 }
-                params.area_id = area.id
+                params.car_no = typeId
+                console.log("params:", params)
                 request.requestParams(
                     [
-                        '/carassignmentssection/addInfo',
+                        '/carvehicleviolation/addInfo',
                         'post',
                         params,
                         (res) => {
@@ -246,33 +198,28 @@
             selectionChange(value) {
                 this.userInfo.selectionArr = value
             },
-            editSubmit(forms, area) {
+            editSubmit(forms, area, carType) {
                 // 修改
-                var areaid
-                if (area.id) {
-                    // 判断是否修改了区域
-                    areaid = area.id
+                var cartypeid
+                if (carType) {
+                    cartypeid = carType
                 } else {
-                    areaid = this.userInfo.selectionArr[0].area_id
+                    cartypeid = this.userInfo.selectionArr[0].car_no
                 }
                 var params = config.formJson(forms)
-                for (var i of forms) {
-                    // 判断日期是否有修改
-                    if (i.selectDate) {
-                        console.log(typeof i.value)
-                        if (typeof i.value == 'object') {
-                            params.working_start_time = config.setDate(i.value)
-                        } else {
-                            params.working_start_time = i.value
+                for(var i in forms) {
+                    if(forms[i].selectDate) {
+                        if(typeof forms[i].value == 'object') {
+                            params[forms[i].prop] = config.setDate(forms[i].value)
                         }
                     }
                 }
-                params.area_id = areaid
+                params.car_no = cartypeid
                 params.id = this.userInfo.selectionArr[0].id
-                console.log("params:",params)
+                console.log("params:", params)
                 request.requestParams(
                     [
-                        '/carassignmentssection/editInfo',
+                        '/carvehicleviolation/editInfo',
                         'put',
                         params,
                         (res) => {
@@ -287,10 +234,9 @@
             },
             deleteForm(value) {
                 // 删除
-                console.log('删除的value:',value)
                 request.requestParams(
                     [
-                        '/carassignmentssection/del/' + value,
+                        '/carvehicleviolation/del/' + value,
                         'delete',
                         {},
                         (res) => {
@@ -316,7 +262,7 @@
             submitImportFile(files) {
                 request.requestParams(
                     [
-                        '/carassignmentssection/import',
+                        '/carvehicleviolation/import',
                         'post',
                         files,
                         (res) => {
@@ -330,18 +276,16 @@
                 )
             },
             submitSearch(forms) {
-                // 搜索
-                console.log('搜索的forms:',forms)
                 this.params.where = [
                     {
-                        name: 'segment_code',
+                        name: 'car_no',
                         op: 'like',
-                        value: config.handleSearch(forms, 'segment_code')
+                        value: config.handleSearch(forms, 'car_no')
                     },
                     {
-                        name: 'segment_name',
-                        op: 'like',
-                        value: config.handleSearch(forms, 'segment_name')
+                        name: 'mobile_unit_id',
+                        op: 'eq',
+                        value: config.handleSearch(forms, 'mobile_unit_id')
                     }
                 ]
                 this.getInfo()
@@ -350,7 +294,7 @@
                 let params = config.setParams(this.params, this.page)
                 request.requestParams(
                     [
-                        '/carassignmentssection/export',
+                        '/carvehicleviolation/export',
                         'post',
                         params,
                         (res) => {
@@ -358,7 +302,7 @@
                             let link = document.createElement('a')
                             link.style.display = 'none'
                             link.href = url
-                            link.setAttribute('download', 'carassignmentssectionExcel.xls')
+                            link.setAttribute('download', '车辆违章记录模板.xls')
                             document.body.appendChild(link)
                             link.click()
                         },
@@ -368,12 +312,12 @@
                 )
             },
             downloadModelFile() {
-                window.open('http://192.168.64.2/cj_project_file/carassignmentssectionModelFile.xls')
+                window.open('http://192.168.64.2/cj_project_file/车辆违章记录模板.xls')
             }
         },
         created() {
             this.getInfo()
-            this.getAreaCommon()
+            this.getCarInfo()
         },
         components: {
             cjMainTopButton

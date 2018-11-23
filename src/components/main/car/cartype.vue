@@ -319,14 +319,14 @@ export default {
             }
         },
         downloadModelFile() {
-            window.open('http://192.168.64.2/cj_project_file/carTypeModelFile.xls')
+            window.open('http://192.168.64.2/cj_project_file/车辆类型模版.xls')
         }
     },
     created() {
         this.getInfo()
     },
     components: {
-        cjMainTopButton
+        cjMainTopButton,
     },
 }
 </script>

@@ -6,6 +6,7 @@ Vue.use(Router)
 
 
 const router = new Router({
+  linkActiveClass: 'active',
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
@@ -92,6 +93,36 @@ const router = new Router({
           path: 'carassignmentssection',
           name: 'carassignmentssection',
           component: () => import('./components/main/car/carassignmentssection.vue')
+        },
+        {
+          // 维修保养记录
+          path: 'carmaintenance',
+          name: 'carmaintenance',
+          component: () => import('./components/main/car/carmaintenance.vue')
+        },
+        {
+          // 车辆保险记录
+          path: 'carclaimrecord',
+          name: 'carclaimrecord',
+          component: () => import('./components/main/car/carclaimrecord.vue')
+        },
+        {
+          // 车辆违章记录
+          path: 'carvehicleviolation',
+          name: 'carvehicleviolation',
+          component: () => import('./components/main/car/carvehicleviolation.vue')
+        },
+        {
+          // 路桥费记录
+          path: 'carvehicletoll',
+          name: 'carvehicletoll',
+          component: () => import('./components/main/car/carvehicletoll.vue')
+        },
+        {
+          // 车辆作业异常情况
+          path: 'carworkingerror',
+          name: 'carworkingerror',
+          component: () => import('./components/main/car/carworkingerror.vue')
         }
       ]
     },
